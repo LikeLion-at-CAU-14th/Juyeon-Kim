@@ -73,6 +73,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'config.middleware.RequestLogMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -156,3 +157,45 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': 
+    {
+        'custom': {
+            'format': '{asctime} {levelname} {message}',
+            'style': '{',
+        },
+    },
+
+    'handlers': {
+        'request_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'logs.log',
+            'formatter': 'custom',
+        },
+        'error_file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': 'errors.log',
+            'formatter': 'custom',
+        },
+    },
+
+    
+    'loggers': {
+        'request_logger': {   
+            'handlers': ['request_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'error_logger': {     
+            'handlers': ['error_file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
