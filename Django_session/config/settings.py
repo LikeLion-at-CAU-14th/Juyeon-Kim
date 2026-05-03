@@ -59,7 +59,8 @@ PROJECT_APPS = [
     'posts', 'accounts',
 ]
 
-THIRD_PARTY_APPS = [ "corsheaders",
+THIRD_PARTY_APPS = [ "corsheaders", 
+                    "rest_framework",
 ]
 
 
