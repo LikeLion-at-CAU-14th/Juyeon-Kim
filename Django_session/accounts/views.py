@@ -4,9 +4,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import *
 from rest_framework import status
+from .permissions import MycustomPermissionIstime, MycustomPermissionIsOwner
+from rest_framework.permissions import IsAuthenticated# jwt 세션
+from django.contrib.auth import logout
 
 # Create your views here.
 class RegisterView(APIView):
+    permission_classes = [MycustomPermissionIstime]
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
 
@@ -37,6 +41,7 @@ class RegisterView(APIView):
 
 # 로그인 담당 view
 class AuthView(APIView):
+    permission_classes = [MycustomPermissionIstime]
     def post(self, request):
         serializer = AuthSerializer(data=request.data)
         
@@ -73,12 +78,8 @@ class AuthView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth import logout
-
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated] # 너 로그인한 사용자 맞아? 를 검사하는 permission
-
+    permission_classes = [MycustomPermissionIstime,IsAuthenticated]
     def post(self, request):
         logout(request)
         return Response({"message": "logout success!"}, status=status.HTTP_200_OK)

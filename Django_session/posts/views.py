@@ -9,6 +9,8 @@ from django.http import JsonResponse # 추가
 from django.shortcuts import get_object_or_404 # 추가
 from django.views.decorators.http import require_http_methods
 from .models import *
+from .permissions import MycustomPermissionIstime, MycustomPermissionIsOwner
+from rest_framework.permissions import IsAuthenticatedOrReadOnly # jwt 세션
 
 # Create your views here.
 import json
@@ -163,6 +165,7 @@ def comment_list(request,post_id):
         })
     
 class PostList(APIView):
+    permission_classes = [MycustomPermissionIstime, MycustomPermissionIsOwner]
     def post(self, request, format=None):
         serializer = PostSerializer(data=request.data)
         if serializer.is_valid():
@@ -175,10 +178,8 @@ class PostList(APIView):
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
-
-from rest_framework.permissions import IsAuthenticatedOrReadOnly # jwt 세션
 class PostDetail(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [MycustomPermissionIstime, MycustomPermissionIsOwner]
     
     def get(self, request, post_id):
         post = get_object_or_404(Post, id=post_id)
