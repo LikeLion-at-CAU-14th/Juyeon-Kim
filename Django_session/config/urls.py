@@ -19,5 +19,6 @@ from django.urls import path,include
 from posts.views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('post/', include('posts.urls'))
+    path('account/', include('accounts.urls')), # 추가하기
+    path('post/', include('posts.urls')),
 ]

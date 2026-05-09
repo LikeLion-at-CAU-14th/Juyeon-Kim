@@ -9,6 +9,7 @@ from django.http import JsonResponse # 추가
 from django.shortcuts import get_object_or_404 # 추가
 from django.views.decorators.http import require_http_methods
 from .models import *
+
 # Create your views here.
 import json
 
@@ -173,8 +174,12 @@ class PostList(APIView):
         posts = Post.objects.all()
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
-    
+
+
+from rest_framework.permissions import IsAuthenticatedOrReadOnly # jwt 세션
 class PostDetail(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
     def get(self, request, post_id):
         post = get_object_or_404(Post, id=post_id)
         serializer = PostSerializer(post)
