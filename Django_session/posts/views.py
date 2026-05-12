@@ -9,6 +9,9 @@ from django.http import JsonResponse # 추가
 from django.shortcuts import get_object_or_404 # 추가
 from django.views.decorators.http import require_http_methods
 from .models import *
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from .permissions import MycustomPermissionIstime, MycustomPermissionIsOwner
+
 # Create your views here.
 import json
 
@@ -173,15 +176,23 @@ class PostList(APIView):
         posts = Post.objects.all()
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
-    
+
 class PostDetail(APIView):
-    def get(self, request, post_id):
+    permission_classes = [IsAuthenticatedOrReadOnly, MycustomPermissionIstime, MycustomPermissionIsOwner]
+    
+    
+    def get_object(self, post_id):
         post = get_object_or_404(Post, id=post_id)
+        self.check_object_permissions(self.request, post)  
+        return post
+    
+    def get(self, request, post_id):
+        post =  self.get_object(post_id)
         serializer = PostSerializer(post)
         return Response(serializer.data)
         
     def put(self, request, post_id):
-        post = get_object_or_404(Post, id=post_id)
+        post =  self.get_object(post_id)
         serializer = PostSerializer(post, data=request.data)
         if serializer.is_valid(): # update이니까 유효성 검사 필요
             serializer.save()
@@ -189,7 +200,7 @@ class PostDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, post_id):
-        post = get_object_or_404(Post, id=post_id)
+        post =  self.get_object(post_id)
         post.delete()
         return Response(
 	        {
