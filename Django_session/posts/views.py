@@ -9,8 +9,8 @@ from django.http import JsonResponse # 추가
 from django.shortcuts import get_object_or_404 # 추가
 from django.views.decorators.http import require_http_methods
 from .models import *
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .permissions import MycustomPermissionIstime, MycustomPermissionIsOwner
-from rest_framework.permissions import IsAuthenticatedOrReadOnly # jwt 세션
 
 # Create your views here.
 import json
@@ -165,7 +165,6 @@ def comment_list(request,post_id):
         })
     
 class PostList(APIView):
-    permission_classes = [MycustomPermissionIstime, MycustomPermissionIsOwner]
     def post(self, request, format=None):
         serializer = PostSerializer(data=request.data)
         if serializer.is_valid():
@@ -179,15 +178,21 @@ class PostList(APIView):
         return Response(serializer.data)
 
 class PostDetail(APIView):
-    permission_classes = [MycustomPermissionIstime, MycustomPermissionIsOwner]
+    permission_classes = [IsAuthenticatedOrReadOnly, MycustomPermissionIstime, MycustomPermissionIsOwner]
+    
+    
+    def get_object(self, post_id):
+        post = get_object_or_404(Post, id=post_id)
+        self.check_object_permissions(self.request, post)  
+        return post
     
     def get(self, request, post_id):
-        post = get_object_or_404(Post, id=post_id)
+        post =  self.get_object(post_id)
         serializer = PostSerializer(post)
         return Response(serializer.data)
         
     def put(self, request, post_id):
-        post = get_object_or_404(Post, id=post_id)
+        post =  self.get_object(post_id)
         serializer = PostSerializer(post, data=request.data)
         if serializer.is_valid(): # update이니까 유효성 검사 필요
             serializer.save()
@@ -195,7 +200,7 @@ class PostDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, post_id):
-        post = get_object_or_404(Post, id=post_id)
+        post =  self.get_object(post_id)
         post.delete()
         return Response(
 	        {
